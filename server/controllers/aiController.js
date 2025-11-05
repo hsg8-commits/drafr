@@ -1,15 +1,27 @@
 // server/controllers/aiController.js
-import OpenAI from "openai";
 import dotenv from "dotenv";
 dotenv.config();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai = null;
+
+// Initialize OpenAI only if API key is available
+if (process.env.OPENAI_API_KEY) {
+  const OpenAI = await import("openai");
+  openai = new OpenAI.default({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 export const askMedicalAI = async (req, res) => {
   try {
     const { message } = req.body;
+
+    // If OpenAI is not configured, return a friendly message
+    if (!openai) {
+      return res.status(200).json({ 
+        reply: "مرحباً! خدمة الذكاء الاصطناعي غير متوفرة حالياً. يرجى الاتصال بالطبيب مباشرة للحصول على استشارة طبية." 
+      });
+    }
 
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -41,6 +53,6 @@ Stay strictly within the boundaries of medical domain knowledge.
     res.status(200).json({ reply });
   } catch (error) {
     console.error("AI Error:", error.message);
-    res.status(500).json({ reply: "Internal server error" });
+    res.status(500).json({ reply: "حدث خطأ داخلي في الخادم" });
   }
 };

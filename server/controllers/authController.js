@@ -72,7 +72,7 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-// ====================Signup====================//
+// ====================Signup - بدون التحقق من OTP====================//
 export const signup = async (req, res) => {
   try {
     const {
@@ -91,16 +91,16 @@ export const signup = async (req, res) => {
       !firstName || !lastName || !email || !phone ||
       !password || !confirmPassword || !city || !state || !role
     ) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
+      return res.status(400).json({ success: false, message: "جميع الحقول مطلوبة" });
     }
 
     if (password !== confirmPassword) {
-      return res.status(400).json({ success: false, message: "Passwords do not match" });
+      return res.status(400).json({ success: false, message: "كلمات المرور غير متطابقة" });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ success: false, message: "User already exists" });
+      return res.status(409).json({ success: false, message: "المستخدم موجود بالفعل" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -116,19 +116,19 @@ export const signup = async (req, res) => {
       state,
     });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
     return res.status(201).json({
       success: true,
-      message: `Account created for ${firstName}`,
+      message: `تم إنشاء الحساب بنجاح لـ ${firstName}`,
       user,
       token,
     });
   } catch (error) {
-    console.error("Signup error:", error.message);
-    return res.status(500).json({ success: false, message: "Signup failed" });
+    console.error("خطأ في التسجيل:", error.message);
+    return res.status(500).json({ success: false, message: "فشل التسجيل" });
   }
 };
 

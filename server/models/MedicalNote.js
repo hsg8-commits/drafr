@@ -26,4 +26,5 @@ const medicalNoteSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const MedicalNote = mongoose.model("MedicalNote", medicalNoteSchema);
+const MedicalNote = mongoose.model("MedicalNote", medicalNoteSchema);
+export default MedicalNote;
